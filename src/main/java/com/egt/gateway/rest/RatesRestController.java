@@ -5,6 +5,7 @@ import com.egt.gateway.dao.CurrencyExchangeRateDAO;
 import com.egt.gateway.dao.RequestDAO;
 import com.egt.gateway.entity.*;
 import com.egt.gateway.service.CurrencyExchangeRateService;
+import com.egt.gateway.service.ProduceMessageService;
 import com.egt.gateway.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -28,11 +29,13 @@ public class RatesRestController {
 
     private RequestService requestService;
     private CurrencyExchangeRateService currencyExchangeRateService;
+    private ProduceMessageService produceMessageService;
 
     @Autowired
-    public RatesRestController(RequestService requestService, CurrencyExchangeRateService currencyExchangeRateService) {
+    public RatesRestController(RequestService requestService, CurrencyExchangeRateService currencyExchangeRateService, ProduceMessageService produceMessageService) {
         this.requestService = requestService;
         this.currencyExchangeRateService = currencyExchangeRateService;
+        this.produceMessageService = produceMessageService;
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -60,6 +63,8 @@ public class RatesRestController {
         } catch (Exception ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, "Couldn't save the request data");
         }
+
+        produceMessageService.produceMessage(newRequest.toString());
 
         return currencyExchangeRate;
     }
@@ -89,6 +94,9 @@ public class RatesRestController {
         } catch (Exception ex) {
             Logger.getAnonymousLogger().log(Level.SEVERE, "Couldn't save the request data");
         }
+
+        produceMessageService.produceMessage(newRequest.toString());
+
         return currencyExchangeRate;
     }
 }

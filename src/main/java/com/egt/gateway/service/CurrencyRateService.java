@@ -37,28 +37,28 @@ public class CurrencyRateService {
         CurrencyRateResponse currencyRateResponse = webClient.get().uri("/latest?access_key=" +accessKey).retrieve().bodyToMono(CurrencyRateResponse.class).retryWhen(
                 Retry.backoff(2, Duration.ofMillis(25))
         ).block();;
-        System.out.println(currencyRateResponse.getRates());
 
         Map<String, Double> rates = currencyRateResponse.getRates();
 
-        for(String key: rates.keySet()) {
-//            Currency toCurrencyId, Currency fromCurrencyId, Date rateDate, double exchangeRate
-            Currency toCurrency = this.currencyService.findByCode(key);
-            Currency fromCurrency = this.currencyService.findByCode(currencyRateResponse.getBase());
-            CurrencyExchangeRate currencyExchangeRate = new CurrencyExchangeRate(toCurrency, fromCurrency, currencyRateResponse.getDate(), rates.get(key));
-            this.currencyExchangeRateService.save(currencyExchangeRate);
+        if(rates != null && rates.size() > 0) {
+            for (String key : rates.keySet()) {
+                Currency toCurrency = this.currencyService.findByCode(key);
+                Currency fromCurrency = this.currencyService.findByCode(currencyRateResponse.getBase());
+                CurrencyExchangeRate currencyExchangeRate = new CurrencyExchangeRate(toCurrency, fromCurrency, currencyRateResponse.getDate(), rates.get(key));
+                this.currencyExchangeRateService.save(currencyExchangeRate);
+            }
         }
     }
 
     public void getCurrencySymbols() {
         CurrencyResponse currencyResponse = webClient.get().uri("/symbols?access_key="+accessKey).retrieve().bodyToMono(CurrencyResponse.class).block();
 
-        System.out.println(currencyResponse);
         Map<String, String> currencies =  currencyResponse.getSymbols();
-        for(String key : currencies.keySet()) {
-            Currency currency = new Currency(key,currencies.get(key));
-            this.currencyService.save(currency);
+        if(currencies != null && currencies.size() > 0) {
+            for(String key : currencies.keySet()) {
+                Currency currency = new Currency(key,currencies.get(key));
+                this.currencyService.save(currency);
+            }
         }
-
     }
 }
